@@ -51,43 +51,59 @@ def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
 
+    # Define step state
+    steps = ["Step 1: Exploratory Data Analysis (EDA)",
+             "Step 2: Correlation Heatmap",
+             "Step 3: Feature Selection and Preprocessing",
+             "Step 4: Model Training and Evaluation"]
+    current_step = st.session_state.get("current_step", 0)
+
     # Upload CSV file
     uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
 
         # Step 1: Exploratory Data Analysis (EDA)
-        st.subheader("Step 1: Exploratory Data Analysis (EDA)")
+        st.subheader(steps[0])
         st.write("Distribution of the target variable (machine_status):")
         st.write(df['machine_status'].value_counts())
 
         if st.button("Next: Correlation Heatmap"):
-            # Step 2: Correlation heatmap
-            st.subheader("Step 2: Correlation Heatmap")
+            st.session_state["current_step"] = current_step + 1
+
+        # Step 2: Correlation heatmap
+        if current_step >= 1:
+            st.subheader(steps[1])
             df_numeric = df.drop(columns=['timestamp'])  # Drop non-numeric column
             plt.figure(figsize=(12, 8))
             sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
             st.pyplot()
 
             if st.button("Next: Feature Selection and Preprocessing"):
-                # Step 3: Preprocess data
-                st.subheader("Step 3: Feature Selection and Preprocessing")
-                X, y, selected_features = preprocess_data(df)
+                st.session_state["current_step"] = current_step + 1
 
-                # Allow manual editing of selected features
-                st.write("Selected Features:")
-                selected_features_editable = st.text_input("Manually edit selected features (comma-separated)", value=", ".join(selected_features))
-                selected_features = [feature.strip() for feature in selected_features_editable.split(",")]
+        # Step 3: Feature Selection and Preprocessing
+        if current_step >= 2:
+            st.subheader(steps[2])
+            X, y, selected_features = preprocess_data(df)
 
-                if st.button("Next: Model Training and Evaluation"):
-                    # Step 4: Train and evaluate model
-                    st.subheader("Step 4: Model Training and Evaluation")
+            # Allow manual editing of selected features
+            st.write("Selected Features:")
+            selected_features_editable = st.text_input("Manually edit selected features (comma-separated)", value=", ".join(selected_features))
+            selected_features = [feature.strip() for feature in selected_features_editable.split(",")]
 
-                    # Train-test split
-                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+            if st.button("Next: Model Training and Evaluation"):
+                st.session_state["current_step"] = current_step + 1
 
-                    accuracy = train_and_evaluate(X_train, y_train, X_test, y_test)
-                    st.write("Average Accuracy:", accuracy)
+        # Step 4: Model Training and Evaluation
+        if current_step >= 3:
+            st.subheader(steps[3])
+
+            # Train-test split
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+            accuracy = train_and_evaluate(X_train, y_train, X_test, y_test)
+            st.write("Average Accuracy:", accuracy)
 
 if __name__ == "__main__":
     main()
