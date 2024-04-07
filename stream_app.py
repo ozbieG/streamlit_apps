@@ -13,14 +13,11 @@ from sklearn.utils import class_weight
 import streamlit as st
 import pandas as pd
 
-# Initialize current step as a global variable
-current_step = 0
-
 # Function to perform resampling and feature selection
 def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     X = df.drop(columns=['machine_status', 'timestamp'])
     y = df['machine_status']
-    
+
     if feature_selection_method == "Random Forest Importance":
         clf = RandomForestClassifier()
         clf.fit(X, y)
@@ -47,7 +44,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
         model = SVC()
     else:
         raise ValueError("Invalid model name. Choose either 'Logistic Regression', 'Random Forest Classifier', or 'Support Vector Machine (SVM)'.")
-    
+
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
@@ -56,18 +53,20 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
 
 # Streamlit App
 def main():
-    global current_step  # Access the global current_step variable
-
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
+
+    # Initialize current_step using session_state (prevents button loop)
+    if "current_step" not in st.session_state:
+        st.session_state["current_step"] = 0
 
     # Upload CSV file
     uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
-        
+
         # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
-        if current_step == 0:
+        if st.session_state["current_step"] == 0:
             st.subheader("Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap")
             st.write("Distribution of the target variable (machine_status):")
             st.write(df['machine_status'].value_counts())
@@ -79,14 +78,14 @@ def main():
             st.pyplot()
 
             if st.button("Next: Feature Selection"):
-                current_step += 1
+                st.session_state["current_step"] += 1  # Update step in session_state
 
         # Step 2: Feature Selection
-        elif current_step == 1:
+        elif st.session_state["current_step"] == 1:
             st.subheader("Step 2: Feature Selection")
 
             # Select feature selection method
-            selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
+                        selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
 
             # Select feature selection threshold
             feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
@@ -98,10 +97,10 @@ def main():
             selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
 
             if st.button("Next: Model Training and Evaluation"):
-                current_step += 1
+                st.session_state["current_step"] += 1  # Update step in session_state
 
         # Step 3: Model Training and Evaluation
-        elif current_step == 2:
+        elif st.session_state["current_step"] == 2:
             st.subheader("Step 3: Model Training and Evaluation")
 
             # Select the model
@@ -115,3 +114,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
