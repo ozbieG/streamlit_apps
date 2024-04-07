@@ -63,7 +63,7 @@ def main():
         df = pd.read_csv(uploaded_file)
 
         # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
-        if st.session_state["current_step"] == 0:
+        if df is not None:
             st.subheader("Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap")
             st.write("Distribution of the target variable (machine_status):")
             st.write(df['machine_status'].value_counts())
