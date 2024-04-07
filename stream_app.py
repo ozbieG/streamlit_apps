@@ -68,7 +68,7 @@ def main():
             st.write(df['machine_status'].value_counts())
 
             if st.button("Next: Correlation Heatmap"):
-                st.session_state["current_step"] = current_step + 1
+                st.session_state["current_step"] += 1
 
         # Step 2: Correlation heatmap
         elif current_step == 1:
@@ -79,7 +79,7 @@ def main():
             st.pyplot()
 
             if st.button("Next: Feature Selection and Preprocessing"):
-                st.session_state["current_step"] = current_step + 1
+                st.session_state["current_step"] += 1
 
         # Step 3: Feature Selection and Preprocessing
         elif current_step == 2:
@@ -91,7 +91,7 @@ def main():
             selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
 
             if st.button("Next: Model Training and Evaluation"):
-                st.session_state["current_step"] = current_step + 1
+                st.session_state["current_step"] += 1
 
         # Step 4: Model Training and Evaluation
         elif current_step == 3:
