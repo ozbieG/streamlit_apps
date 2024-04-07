@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn.metrics import accuracy_score
-from imblearn.pipeline import Pipeline
+from sklearn.feature_selection import SelectKBest, f_classif
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.utils import class_weight
@@ -15,15 +15,15 @@ import pandas as pd
 def preprocess_data(df):
     X = df.drop(columns=['machine_status', 'timestamp'])
     y = df['machine_status']
-    # Perform feature selection using Logistic Regression
-    model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=1000)
-    model.fit(X, y)
-    importance = np.abs(model.coef_[0])
-    feature_names = X.columns
-
-    # Select features with non-zero coefficients
-    selected_features = feature_names[model.coef_[0] != 0]
-
+    
+    # Use SelectKBest with f_classif scoring function
+    k_best = SelectKBest(score_func=f_classif, k=5)  # Select top 5 features
+    X_selected = k_best.fit_transform(X, y)
+    
+    # Get selected feature indices
+    selected_indices = k_best.get_support(indices=True)
+    selected_features = X.columns[selected_indices]
+    
     return X[selected_features], y, selected_features
 
 def train_and_evaluate(X_train, y_train, X_test, y_test):
@@ -80,8 +80,7 @@ def main():
 
             # Allow manual editing of selected features using checkbox list
             st.write("Suggested Features:")
-            selected_feature_indices = st.multiselect("Select features to include", selected_features)
-            selected_features = [feature for feature in selected_features if feature in selected_feature_indices]
+            selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features)
 
             if st.button("Next: Model Training and Evaluation"):
                 st.session_state["current_step"] = current_step + 1
