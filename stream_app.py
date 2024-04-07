@@ -13,6 +13,9 @@ from sklearn.utils import class_weight
 import streamlit as st
 import pandas as pd
 
+# Initialize current step as a global variable
+current_step = 0
+
 # Function to perform resampling and feature selection
 def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     X = df.drop(columns=['machine_status', 'timestamp'])
@@ -53,11 +56,10 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
 
 # Streamlit App
 def main():
+    global current_step  # Access the global current_step variable
+
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
-
-    # Initialize current step
-    current_step = 0
 
     # Upload CSV file
     uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
