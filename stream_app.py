@@ -2,7 +2,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegressionCV, ProbitRegression
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectKBest, f_classif
 from imblearn.over_sampling import SMOTE
@@ -26,12 +26,15 @@ def preprocess_data(df):
     
     return X[selected_features], y, selected_features
 
-def train_and_evaluate(X_train, y_train, X_test, y_test):
-    # Define Logistic Regression model
-    model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=1000)
-    # Train the model
+def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
+    if model_name == "Logistic Regression":
+        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=1000)
+    elif model_name == "Probit Regression":
+        model = ProbitRegression()
+    else:
+        raise ValueError("Invalid model name. Choose either 'Logistic Regression' or 'Probit Regression'.")
+    
     model.fit(X_train, y_train)
-    # Test the model
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
 
@@ -89,10 +92,13 @@ def main():
         if current_step >= 3:
             st.subheader(steps[3])
 
+            # Select the model
+            selected_model = st.selectbox("Select model", ["Logistic Regression", "Probit Regression"])
+
             # Train-test split
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-            accuracy = train_and_evaluate(X_train, y_train, X_test, y_test)
+            accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, selected_model)
             st.write("Average Accuracy:", accuracy)
 
 if __name__ == "__main__":
