@@ -35,8 +35,6 @@ def preprocess_data(df):
     selected_features = feature_names[model.coef_[0] != 0]
 
     return X_resampled[selected_features], y_resampled, selected_features
-
-# Function to train model and evaluate using Stratified KFold
 def train_and_evaluate(X, y):
     # Define Stratified KFold for balanced splits
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
