@@ -64,7 +64,7 @@ def main():
 
         # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
         if df is not None:
-            st.subheader("Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap")
+            st.subheader("Exploratory Data Analysis (EDA)")
             st.write("Distribution of the target variable (machine_status):")
             st.write(df['machine_status'].value_counts())
             st.write("Correlation Heatmap:")
@@ -75,29 +75,29 @@ def main():
             st.pyplot()
 
             if st.button("Next: Feature Selection"):
-                st.subheader("Step 2: Feature Selection")
+                st.subheader("Feature Selection")
                 selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
 
                 # Select feature selection threshold
                 feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
 
-                X, y, selected_features = preprocess_data(df, selected_feature_selection_method, feature_selection_threshold)
+                if st.button("Execute"):
+                    X, y, selected_features = preprocess_data(df, selected_feature_selection_method, feature_selection_threshold)
 
-                # Allow manual editing of selected features using checkbox list
-                st.write("Selected Features:")
-                selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
-                if st.button("Next: Model Training and Evaluation"):
-                    st.subheader("Step 3: Model Training and Evaluation")
+                    # Allow manual editing of selected features using checkbox list
+                    st.write("Selected Features:")
+                    selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
+                    if st.button("Next: Model Training and Evaluation"):
+                        st.subheader("Model Training and Evaluation")
 
-                    # Select the model
-                    selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
+                        # Select the model
+                        selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
 
-                    # Train-test split
-                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+                        # Train-test split
+                        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-                    accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, selected_model)
-                    st.write("Average Accuracy:", accuracy)
-            
+                        accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, selected_model)
+                        st.write("Average Accuracy:", accuracy)
 if __name__ == "__main__":
     main()
 
