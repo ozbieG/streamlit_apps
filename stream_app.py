@@ -2,7 +2,9 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegressionCV, ProbitRegression
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectKBest, f_classif
 from imblearn.over_sampling import SMOTE
@@ -29,10 +31,12 @@ def preprocess_data(df):
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     if model_name == "Logistic Regression":
         model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=1000)
-    elif model_name == "Probit Regression":
-        model = ProbitRegression()
+    elif model_name == "Random Forest Classifier":
+        model = RandomForestClassifier()
+    elif model_name == "Support Vector Machine (SVM)":
+        model = SVC()
     else:
-        raise ValueError("Invalid model name. Choose either 'Logistic Regression' or 'Probit Regression'.")
+        raise ValueError("Invalid model name. Choose either 'Logistic Regression', 'Random Forest Classifier', or 'Support Vector Machine (SVM)'.")
     
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
@@ -93,7 +97,7 @@ def main():
             st.subheader(steps[3])
 
             # Select the model
-            selected_model = st.selectbox("Select model", ["Logistic Regression", "Probit Regression"])
+            selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
 
             # Train-test split
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
