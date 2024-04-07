@@ -15,25 +15,16 @@ import pandas as pd
 def preprocess_data(df):
     X = df.drop(columns=['machine_status', 'timestamp'])
     y = df['machine_status']
-
-    # Perform resampling to address class imbalance
-    resampling_pipeline = Pipeline([
-        ('oversample', SMOTE(sampling_strategy=0.5, random_state=42)),
-        ('undersample', RandomUnderSampler(sampling_strategy=1.0, random_state=42))
-    ])
-
-    X_resampled, y_resampled = resampling_pipeline.fit_resample(X, y)
-
     # Perform feature selection using Logistic Regression
     model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=1000)
-    model.fit(X_resampled, y_resampled)
+    model.fit(X, y)
     importance = np.abs(model.coef_[0])
     feature_names = X.columns
 
     # Select features with non-zero coefficients
     selected_features = feature_names[model.coef_[0] != 0]
 
-    return X_resampled[selected_features], y_resampled, selected_features
+    return X[selected_features], y, selected_features
 
 def train_and_evaluate(X_train, y_train, X_test, y_test):
     # Define Logistic Regression model
@@ -87,10 +78,10 @@ def main():
             st.subheader(steps[2])
             X, y, selected_features = preprocess_data(df)
 
-            # Allow manual editing of selected features
-            st.write("Selected Features:")
-            selected_features_editable = st.text_input("Manually edit selected features (comma-separated)", value=", ".join(selected_features))
-            selected_features = [feature.strip() for feature in selected_features_editable.split(",")]
+            # Allow manual editing of selected features using checkbox list
+            st.write("Suggested Features:")
+            selected_feature_indices = st.multiselect("Select features to include", selected_features)
+            selected_features = [feature for feature in selected_features if feature in selected_feature_indices]
 
             if st.button("Next: Model Training and Evaluation"):
                 st.session_state["current_step"] = current_step + 1
