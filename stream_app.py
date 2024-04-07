@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.feature_selection import RFE
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.utils import class_weight
@@ -14,16 +15,23 @@ import streamlit as st
 import pandas as pd
 
 # Function to perform resampling and feature selection
-def preprocess_data(df):
+def preprocess_data(df, feature_selection_method):
     X = df.drop(columns=['machine_status', 'timestamp'])
     y = df['machine_status']
     
-    # Use SelectKBest with f_classif scoring function
-    k_best = SelectKBest(score_func=f_classif, k=5)  # Select top 5 features
-    X_selected = k_best.fit_transform(X, y)
-    
-    # Get selected feature indices
-    selected_indices = k_best.get_support(indices=True)
+    # Perform feature selection based on the selected method
+    if feature_selection_method == "SelectKBest":
+        k_best = SelectKBest(score_func=f_classif, k=15)  # Select top 15 features
+        X_selected = k_best.fit_transform(X, y)
+        selected_indices = k_best.get_support(indices=True)
+    elif feature_selection_method == "Recursive Feature Elimination (RFE)":
+        estimator = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=1000)
+        rfe = RFE(estimator, n_features_to_select=5)
+        X_selected = rfe.fit_transform(X, y)
+        selected_indices = rfe.get_support(indices=True)
+    else:
+        raise ValueError("Invalid feature selection method. Choose either 'SelectKBest' or 'Recursive Feature Elimination (RFE)'.")
+
     selected_features = X.columns[selected_indices]
     
     return X[selected_features], y, selected_features
@@ -50,10 +58,9 @@ def main():
     st.title("Predictive Maintenance Model")
 
     # Define step state
-    steps = ["Step 1: Exploratory Data Analysis (EDA)",
-             "Step 2: Correlation Heatmap",
-             "Step 3: Feature Selection and Preprocessing",
-             "Step 4: Model Training and Evaluation"]
+    steps = ["Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap",
+             "Step 2: Feature Selection",
+             "Step 3: Model Training and Evaluation"]
 
     # Initialize current_step in session_state
     if "current_step" not in st.session_state:
@@ -66,41 +73,40 @@ def main():
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
 
-        # Step 1: Exploratory Data Analysis (EDA)
+        # Step 1: Exploratory Data Analysis (EDA) & Correlation heatmap
         if current_step == 0:
             st.subheader(steps[0])
             st.write("Distribution of the target variable (machine_status):")
             st.write(df['machine_status'].value_counts())
 
-            if st.button("Next: Correlation Heatmap"):
-                st.session_state["current_step"] += 1
-
-        # Step 2: Correlation heatmap
-        elif current_step == 1:
-            st.subheader(steps[1])
+            st.write("Correlation Heatmap:")
             df_numeric = df.drop(columns=['timestamp'])  # Drop non-numeric column
             plt.figure(figsize=(12, 8))
             sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
             st.pyplot()
 
-            if st.button("Next: Feature Selection and Preprocessing"):
+            if st.button("Next: Feature Selection"):
                 st.session_state["current_step"] += 1
 
-        # Step 3: Feature Selection and Preprocessing
-        elif current_step == 2:
-            st.subheader(steps[2])
-            X, y, selected_features = preprocess_data(df)
+        # Step 2: Feature Selection
+        elif current_step == 1:
+            st.subheader(steps[1])
+
+            # Select feature selection method
+            selected_feature_selection_method = st.selectbox("Select feature selection method", ["SelectKBest", "Recursive Feature Elimination (RFE)"])
+
+            X, y, selected_features = preprocess_data(df, selected_feature_selection_method)
 
             # Allow manual editing of selected features using checkbox list
-            st.write("Suggested Features:")
+            st.write("Selected Features:")
             selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
 
             if st.button("Next: Model Training and Evaluation"):
                 st.session_state["current_step"] += 1
 
-        # Step 4: Model Training and Evaluation
-        elif current_step == 3:
-            st.subheader(steps[3])
+        # Step 3: Model Training and Evaluation
+        elif current_step == 2:
+            st.subheader(steps[2])
 
             # Select the model
             selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
