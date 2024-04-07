@@ -54,7 +54,12 @@ def main():
              "Step 2: Correlation Heatmap",
              "Step 3: Feature Selection and Preprocessing",
              "Step 4: Model Training and Evaluation"]
-    current_step = st.session_state.get("current_step", 0)
+
+    # Initialize current_step in session_state
+    if "current_step" not in st.session_state:
+        st.session_state["current_step"] = 0
+
+    current_step = st.session_state["current_step"]
 
     # Upload CSV file
     uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
