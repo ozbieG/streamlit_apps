@@ -56,11 +56,6 @@ def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
 
-    # Define step state
-    steps = ["Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap",
-             "Step 2: Feature Selection",
-             "Step 3: Model Training and Evaluation"]
-
     # Initialize current_step in session_state
     if "current_step" not in st.session_state:
         st.session_state["current_step"] = 0
@@ -76,10 +71,8 @@ def main():
         st.session_state["current_step"] = 0
 
         # Step selection
-        step_selection = st.selectbox("Select step", steps, index=current_step)
-
-        if step_selection == "Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap":
-            st.subheader(step_selection)
+        if current_step == 0:
+            st.subheader("Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap")
             st.write("Distribution of the target variable (machine_status):")
             st.write(df['machine_status'].value_counts())
             st.write("Correlation Heatmap:")
@@ -89,11 +82,11 @@ def main():
             sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
             st.pyplot()
 
-            # Advance to the next step automatically
-            st.session_state["current_step"] = 1
+            if st.button("Next: Feature Selection"):
+                st.session_state["current_step"] += 1
 
-        elif step_selection == "Feature Selection":
-            st.subheader(step_selection)
+        elif current_step == 1:
+            st.subheader("Step 2: Feature Selection")
 
             # Select feature selection method
             selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
@@ -107,11 +100,11 @@ def main():
             st.write("Selected Features:")
             selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
 
-            # Advance to the next step automatically
-            st.session_state["current_step"] = 2
+            if st.button("Next: Model Training and Evaluation"):
+                st.session_state["current_step"] += 1
 
-        elif step_selection == "Model Training and Evaluation":
-            st.subheader(step_selection)
+        elif current_step == 2:
+            st.subheader("Step 3: Model Training and Evaluation")
 
             # Select the model
             selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
