@@ -6,8 +6,7 @@ from sklearn.linear_model import LogisticRegressionCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
-from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.feature_selection import RFE
+from sklearn.feature_selection import SelectFromModel
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.utils import class_weight
@@ -15,26 +14,26 @@ import streamlit as st
 import pandas as pd
 
 # Function to perform resampling and feature selection
-def preprocess_data(df, feature_selection_method):
+def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     X = df.drop(columns=['machine_status', 'timestamp'])
     y = df['machine_status']
     
-    # Perform feature selection based on the selected method
-    if feature_selection_method == "SelectKBest":
-        k_best = SelectKBest(score_func=f_classif, k=15)  # Select top 15 features
-        X_selected = k_best.fit_transform(X, y)
-        selected_indices = k_best.get_support(indices=True)
-    elif feature_selection_method == "Recursive Feature Elimination (RFE)":
-        estimator = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=1000)
-        rfe = RFE(estimator, n_features_to_select=5)
-        X_selected = rfe.fit_transform(X, y)
-        selected_indices = rfe.get_support(indices=True)
+    if feature_selection_method == "Random Forest Importance":
+        clf = RandomForestClassifier()
+        clf.fit(X, y)
+        feature_importances = clf.feature_importances_
+        selected_features = X.columns[feature_importances >= feature_selection_threshold]
+        X_selected = X[selected_features]
+    elif feature_selection_method == "SVM Weight Coefficients":
+        clf = SVC(kernel="linear")
+        clf.fit(X, y)
+        coef_abs = np.abs(clf.coef_[0])
+        selected_features = X.columns[coef_abs >= feature_selection_threshold]
+        X_selected = X[selected_features]
     else:
-        raise ValueError("Invalid feature selection method. Choose either 'SelectKBest' or 'Recursive Feature Elimination (RFE)'.")
+        raise ValueError("Invalid feature selection method. Choose either 'Random Forest Importance' or 'SVM Weight Coefficients'.")
 
-    selected_features = X.columns[selected_indices]
-    
-    return X[selected_features], y, selected_features
+    return X_selected, y, selected_features
 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     if model_name == "Logistic Regression":
@@ -93,9 +92,12 @@ def main():
             st.subheader(steps[1])
 
             # Select feature selection method
-            selected_feature_selection_method = st.selectbox("Select feature selection method", ["SelectKBest", "Recursive Feature Elimination (RFE)"])
+            selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
 
-            X, y, selected_features = preprocess_data(df, selected_feature_selection_method)
+            # Select feature selection threshold
+            feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
+
+            X, y, selected_features = preprocess_data(df, selected_feature_selection_method, feature_selection_threshold)
 
             # Allow manual editing of selected features using checkbox list
             st.write("Selected Features:")
