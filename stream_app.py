@@ -62,15 +62,16 @@ def main():
         df = pd.read_csv(uploaded_file)
 
         # Step 1: Exploratory Data Analysis (EDA)
-        st.subheader(steps[0])
-        st.write("Distribution of the target variable (machine_status):")
-        st.write(df['machine_status'].value_counts())
+        if current_step == 0:
+            st.subheader(steps[0])
+            st.write("Distribution of the target variable (machine_status):")
+            st.write(df['machine_status'].value_counts())
 
-        if st.button("Next: Correlation Heatmap"):
-            st.session_state["current_step"] = current_step + 1
+            if st.button("Next: Correlation Heatmap"):
+                st.session_state["current_step"] = current_step + 1
 
         # Step 2: Correlation heatmap
-        if current_step >= 1:
+        elif current_step == 1:
             st.subheader(steps[1])
             df_numeric = df.drop(columns=['timestamp'])  # Drop non-numeric column
             plt.figure(figsize=(12, 8))
@@ -81,7 +82,7 @@ def main():
                 st.session_state["current_step"] = current_step + 1
 
         # Step 3: Feature Selection and Preprocessing
-        if current_step >= 2:
+        elif current_step == 2:
             st.subheader(steps[2])
             X, y, selected_features = preprocess_data(df)
 
@@ -93,7 +94,7 @@ def main():
                 st.session_state["current_step"] = current_step + 1
 
         # Step 4: Model Training and Evaluation
-        if current_step >= 3:
+        elif current_step == 3:
             st.subheader(steps[3])
 
             # Select the model
