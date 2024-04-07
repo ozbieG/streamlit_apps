@@ -56,21 +56,15 @@ def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
 
-    # Initialize current_step in session_state
-    if "current_step" not in st.session_state:
-        st.session_state["current_step"] = 0
-
-    current_step = st.session_state["current_step"]
+    # Initialize current step
+    current_step = 0
 
     # Upload CSV file
     uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         
-        # Reset current_step when a new CSV file is uploaded
-        st.session_state["current_step"] = 0
-
-        # Step selection
+        # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
         if current_step == 0:
             st.subheader("Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap")
             st.write("Distribution of the target variable (machine_status):")
@@ -83,8 +77,9 @@ def main():
             st.pyplot()
 
             if st.button("Next: Feature Selection"):
-                st.session_state["current_step"] += 1
+                current_step += 1
 
+        # Step 2: Feature Selection
         elif current_step == 1:
             st.subheader("Step 2: Feature Selection")
 
@@ -101,8 +96,9 @@ def main():
             selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
 
             if st.button("Next: Model Training and Evaluation"):
-                st.session_state["current_step"] += 1
+                current_step += 1
 
+        # Step 3: Model Training and Evaluation
         elif current_step == 2:
             st.subheader("Step 3: Model Training and Evaluation")
 
@@ -114,9 +110,6 @@ def main():
 
             accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, selected_model)
             st.write("Average Accuracy:", accuracy)
-
-            # Reset current_step after completing all steps
-            st.session_state["current_step"] = 0
 
 if __name__ == "__main__":
     main()
