@@ -73,8 +73,9 @@ def main():
 
         # Correlation heatmap
         st.write("Correlation Heatmap")
+        df_numeric = df.drop(columns=['timestamp'])  # Drop non-numeric column
         plt.figure(figsize=(12, 8))
-        sns.heatmap(df.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+        sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
         st.pyplot()
 
         # Preprocess data
