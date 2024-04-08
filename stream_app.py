@@ -12,6 +12,7 @@ from imblearn.under_sampling import RandomUnderSampler
 from sklearn.utils import class_weight
 import streamlit as st
 import pandas as pd
+import time
 
 # Function to perform resampling and feature selection
 def preprocess_data(df, feature_selection_method, feature_selection_threshold):
@@ -51,7 +52,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
 
     return accuracy
 
-# Streamlit App
+
 # Streamlit App
 def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -70,10 +71,11 @@ def main():
             except Exception as e:
                 st.error(f"Error reading CSV file: {e}")
                 return None  # Indicate error
+
     # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
     if current_step == 0:
         # Upload CSV file
-        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key="file_uploader_1")  # Unique key
         df = load_data(uploaded_file)  # Call the cached function to load data
         st.subheader("Exploratory Data Analysis (EDA)")
         if df is not None:
