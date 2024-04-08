@@ -141,7 +141,7 @@ def main():
         # Correlation heatmap for numeric features
         st.write("Correlation Heatmap for numeric features:")
         plt.figure(figsize=(12, 8))
-        sns.heatmap(st.session_state.df.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+        sns.heatmap(numeric_columns.corr(), annot=True, cmap='coolwarm', fmt=".2f")
         st.pyplot()
 
         
