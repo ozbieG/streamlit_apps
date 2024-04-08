@@ -66,8 +66,17 @@ def main():
         st.session_state.df = None
     if 'selected_features' not in st.session_state:
         st.session_state.selected_features = []
-
-    # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
+    if 'feature_selection_button' not in st.session_state:
+        st.session_state.feature_selection_button = False
+    if 'model_selection_button' not in st.session_state:
+        st.session_state.model_selection_button = False
+    if 'selected_feature_selection_method' not in st.session_state:
+        st.session_state.selected_feature_selection_method = "Random Forest Importance"
+    if 'feature_selection_threshold' not in st.session_state:
+        st.session_state.feature_selection_threshold = 0.05
+    if 'selected_model' not in st.session_state:
+        st.session_state.selected_model = "Logistic Regression"
+        
     @st.cache(allow_output_mutation=True)
     def load_data(uploaded_file):
         if uploaded_file is not None:
@@ -76,7 +85,7 @@ def main():
                 return df
             except Exception as e:
                 st.error(f"Error reading CSV file: {e}")
-                return None  # Indicate error
+                return None
 
     # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
     if st.session_state.df is None:
@@ -98,13 +107,13 @@ def main():
         
         # Step 2: Feature Selection
         st.subheader("Feature Selection")
-        selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
-
+        st.session_state.selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
         # Select feature selection threshold
-        feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
+        st.session_state.feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
 
-        if st.button("Next"):
-            X, y, selected_features = preprocess_data(st.session_state.df, selected_feature_selection_method, feature_selection_threshold)
+        if st.button("Next") | st.session_state.feature_selection_button:
+            st.session_state.feature_selection_button = True
+            X, y, selected_features = preprocess_data(st.session_state.df, st.session_state.selected_feature_selection_method, st.session_state.feature_selection_threshold)
             st.session_state.selected_features = selected_features
 
             # Allow manual editing of selected features using checkbox list
@@ -115,13 +124,14 @@ def main():
             st.subheader("Model Training and Evaluation")
 
             # Select the model
-            selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
+            st.session_state.selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
 
             # Train-test split
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-            accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, selected_model)
-            st.write("Average Accuracy:", accuracy)
+            if st.button("Train and Test") | st.session_state.model_selection_button:
+                st.session_state.model_selection_button = True
+                accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+                st.write("Average Accuracy:", accuracy)
 
 if __name__ == "__main__":
     main()
