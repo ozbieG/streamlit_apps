@@ -69,24 +69,23 @@ def main():
 
     current_step = 0
 
-    if df is not None:
         # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
-        if current_step == 0:
-            # Upload CSV file
-            uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
-            df = load_data()  # Call the cached function to load data
-            st.subheader("Exploratory Data Analysis (EDA)")
-            st.write("Distribution of the target variable (machine_status):")
-            st.write(df['machine_status'].value_counts())
-            st.write("Correlation Heatmap:")
-            non_numeric_columns = df.select_dtypes(exclude=[np.number]).columns.tolist()
-            df_numeric = df.drop(columns=non_numeric_columns)
-            plt.figure(figsize=(12, 8))
-            sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
-            st.pyplot()
+    if current_step == 0:
+        # Upload CSV file
+        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+        df = load_data()  # Call the cached function to load data
+        st.subheader("Exploratory Data Analysis (EDA)")
+        st.write("Distribution of the target variable (machine_status):")
+        st.write(df['machine_status'].value_counts())
+        st.write("Correlation Heatmap:")
+        non_numeric_columns = df.select_dtypes(exclude=[np.number]).columns.tolist()
+        df_numeric = df.drop(columns=non_numeric_columns)
+        plt.figure(figsize=(12, 8))
+        sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+        st.pyplot()
 
-            if st.button("Next: Feature Selection"):
-                current_step = 1  # Update step after EDA
+        if st.button("Next: Feature Selection"):
+            current_step = 1  # Update step after EDA
 
         # Step 2: Feature Selection
         if current_step == 1:
