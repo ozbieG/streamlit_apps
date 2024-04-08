@@ -76,7 +76,7 @@ def main():
     if 'button_click' not in st.session_state:
         st.session_state.button_click = False
     if 'button_click1' not in st.session_state:
-        st.session_state.button_click = False
+        st.session_state.button_click1 = False
     if 'selected_feature_selection_method' not in st.session_state:
         st.session_state.selected_feature_selection_method = "Random Forest Importance"
     if 'feature_selection_threshold' not in st.session_state:
