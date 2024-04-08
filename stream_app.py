@@ -12,6 +12,8 @@ import streamlit as st
 import pandas as pd
 import time
 from sklearn.utils import resample
+from sklearn.metrics import classification_report, confusion_matrix
+
 
 # Function to perform resampling and feature selection
 @st.cache(allow_output_mutation=True)
@@ -110,13 +112,38 @@ def main():
     if st.session_state.df is not None:
         st.subheader("Exploratory Data Analysis (EDA)")
         st.write("Distribution of the target variable (machine_status):")
-        st.write(st.session_state.df['machine_status'].value_counts())
-        st.write("Correlation Heatmap:")
-        non_numeric_columns = st.session_state.df.select_dtypes(exclude=[np.number]).columns.tolist()
-        df_numeric = st.session_state.df.drop(columns=non_numeric_columns)
-        plt.figure(figsize=(12, 8))
-        sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+        machine_status_counts = st.session_state.df['machine_status'].value_counts()
+        st.write(machine_status_counts)
+
+        # Plotting the distribution of the target variable
+        plt.figure(figsize=(8, 6))
+        sns.countplot(data=st.session_state.df, x='machine_status')
+        plt.title("Distribution of machine_status")
+        plt.xlabel("Machine Status")
+        plt.ylabel("Count")
         st.pyplot()
+
+        # Numeric features summary statistics
+        st.write("Summary statistics for numeric features:")
+        st.write(st.session_state.df.describe())
+
+        # Boxplot for each numeric feature with respect to machine_status
+        st.write("Boxplot for each numeric feature with respect to machine_status:")
+        numeric_columns = st.session_state.df.select_dtypes(include=[np.number]).columns.tolist()
+        for column in numeric_columns:
+            plt.figure(figsize=(10, 6))
+            sns.boxplot(data=st.session_state.df, x='machine_status', y=column)
+            plt.title(f"Boxplot of {column} by machine_status")
+            plt.xlabel("Machine Status")
+            plt.ylabel(column)
+            st.pyplot()
+
+        # Correlation heatmap for numeric features
+        st.write("Correlation Heatmap for numeric features:")
+        plt.figure(figsize=(12, 8))
+        sns.heatmap(st.session_state.df.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+        st.pyplot()
+
         
         # Step 2: Feature Selection
         st.subheader("Feature Selection")
@@ -147,8 +174,42 @@ def main():
         # Train-test split
     if st.session_state.button_click1:
         X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.3, random_state=42)
+
+        # Train the model and evaluate
         accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+
+        # Display average accuracy
         st.write("Average Accuracy:", accuracy)
+
+        # Get predictions
+        model = None
+        if st.session_state.selected_model == "Logistic Regression":
+            model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=5000)
+        elif st.session_state.selected_model == "Random Forest Classifier":
+            model = RandomForestClassifier()
+        elif st.session_state.selected_model == "Support Vector Machine (SVM)":
+            model = SVC()
+
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+
+        # Classification Report
+        st.write("Classification Report:")
+        st.write(classification_report(y_test, y_pred))
+
+        # Confusion Matrix
+        st.write("Confusion Matrix:")
+        conf_matrix = confusion_matrix(y_test, y_pred)
+        st.write(conf_matrix)
+
+        # Visualize Confusion Matrix
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(conf_matrix, annot=True, cmap='coolwarm', fmt='d')
+        plt.title("Confusion Matrix")
+        plt.xlabel("Predicted Label")
+        plt.ylabel("True Label")
+        st.pyplot()
+
 
 if __name__ == "__main__":
     main()
