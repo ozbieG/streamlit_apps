@@ -94,7 +94,7 @@ def main():
             current_step = 1  # Update step after EDA
 
     # Step 2: Feature Selection
-    if current_step == 1:
+    elif current_step == 1:
         st.subheader("Feature Selection")
         selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
 
@@ -113,7 +113,7 @@ def main():
                 current_step = 2  # Update step after Feature Selection
 
     # Step 3: Model Training and Evaluation
-    if current_step == 2:
+    elif current_step == 2:
         st.subheader("Model Training and Evaluation")
 
         if df is not None:  # Check if df is not None before training and evaluation
