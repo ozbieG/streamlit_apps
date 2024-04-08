@@ -75,49 +75,37 @@ def main():
                 return None  # Indicate error
 
     # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
-    if current_step == 0:
-        # Upload CSV file
-        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{file_uploader_counter}")
-        df = load_data(uploaded_file)
-
-        # Update current_step regardless of whether df is None (error handling will be later)
-        current_step = 1
-
-        if df is not None:
-            st.subheader("Exploratory Data Analysis (EDA)")
-            st.write("Distribution of the target variable (machine_status):")
-            st.write(df['machine_status'].value_counts())
-            st.write("Correlation Heatmap:")
-            non_numeric_columns = df.select_dtypes(exclude=[np.number]).columns.tolist()
-            df_numeric = df.drop(columns=non_numeric_columns)
-            plt.figure(figsize=(12, 8))
-            sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
-            st.pyplot()
-
-    # Step 2: Feature Selection
-    elif current_step == 1:
+    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{file_uploader_counter}")
+    df = load_data(uploaded_file)
+    
+    if df is not None:
+        st.subheader("Exploratory Data Analysis (EDA)")
+        st.write("Distribution of the target variable (machine_status):")
+        st.write(df['machine_status'].value_counts())
+        st.write("Correlation Heatmap:")
+        non_numeric_columns = df.select_dtypes(exclude=[np.number]).columns.tolist()
+        df_numeric = df.drop(columns=non_numeric_columns)
+        plt.figure(figsize=(12, 8))
+        sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+        st.pyplot()
+        
+        # Step 2: Feature Selection
         st.subheader("Feature Selection")
         selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
 
         # Select feature selection threshold
         feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
 
-        if st.button("Execute"):
-            if df is not None:  # Check if df is not None before preprocessing
-                X, y, selected_features = preprocess_data(df, selected_feature_selection_method, feature_selection_threshold)
+        if st.button("Next"):
+            X, y, selected_features = preprocess_data(df, selected_feature_selection_method, feature_selection_threshold)
 
-                # Allow manual editing of selected features using checkbox list
-                st.write("Selected Features:")
-                selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
+            # Allow manual editing of selected features using checkbox list
+            st.write("Selected Features:")
+            selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
 
-                # Automatically proceed to the next step after executing feature selection
-                current_step = 2  # Update step after Feature Selection
+            # Step 3: Model Training and Evaluation
+            st.subheader("Model Training and Evaluation")
 
-    # Step 3: Model Training and Evaluation
-    elif current_step == 2:
-        st.subheader("Model Training and Evaluation")
-
-        if df is not None:  # Check if df is None before training and evaluation
             # Select the model
             selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
 
@@ -128,7 +116,6 @@ def main():
             st.write("Average Accuracy:", accuracy)
 
     # Save current step and file uploader counter in session state
-    st.session_state['current_step'] = current_step
     st.session_state['file_uploader_counter'] = file_uploader_counter + 1
 
 if __name__ == "__main__":
