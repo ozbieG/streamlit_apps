@@ -52,7 +52,6 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
 
     return accuracy
 
-
 # Streamlit App
 def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -60,6 +59,9 @@ def main():
 
     # Initialize current step as a session state
     current_step = st.session_state.get('current_step', 0)
+
+    # Generate a counter for file uploader keys
+    file_uploader_counter = st.session_state.get('file_uploader_counter', 0)
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
     @st.cache(allow_output_mutation=True)
@@ -75,7 +77,7 @@ def main():
     # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
     if current_step == 0:
         # Upload CSV file
-        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key="file_uploader_1")  # Unique key
+        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{file_uploader_counter}")  # Unique key
         df = load_data(uploaded_file)  # Call the cached function to load data
         st.subheader("Exploratory Data Analysis (EDA)")
         if df is not None:
@@ -124,12 +126,9 @@ def main():
             accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, selected_model)
             st.write("Average Accuracy:", accuracy)
 
-    # Save current step in session state
+    # Save current step and file uploader counter in session state
     st.session_state['current_step'] = current_step
-
-if __name__ == "__main__":
-    main()
-
+    st.session_state['file_uploader_counter'] = file_uploader_counter + 1
 
 if __name__ == "__main__":
     main()
