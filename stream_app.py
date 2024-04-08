@@ -79,8 +79,8 @@ def main():
         # Upload CSV file
         uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{file_uploader_counter}")  # Unique key
         df = load_data(uploaded_file)  # Call the cached function to load data
-        st.subheader("Exploratory Data Analysis (EDA)")
         if df is not None:
+            st.subheader("Exploratory Data Analysis (EDA)")
             st.write("Distribution of the target variable (machine_status):")
             st.write(df['machine_status'].value_counts())
             st.write("Correlation Heatmap:")
@@ -90,8 +90,8 @@ def main():
             sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
             st.pyplot()
 
-            if st.button("Next: Feature Selection"):
-                current_step = 1  # Update step after EDA
+            # Automatically proceed to the next step after dataset upload
+            current_step = 1  # Update step after EDA
 
     # Step 2: Feature Selection
     if current_step == 1:
@@ -109,8 +109,8 @@ def main():
                 st.write("Selected Features:")
                 selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
 
-                if st.button("Next: Model Training and Evaluation"):
-                    current_step = 2  # Update step after Feature Selection
+                # Automatically proceed to the next step after executing feature selection
+                current_step = 2  # Update step after Feature Selection
 
     # Step 3: Model Training and Evaluation
     if current_step == 2:
