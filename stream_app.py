@@ -13,6 +13,7 @@ from sklearn.utils import class_weight
 import streamlit as st
 import pandas as pd
 import time
+from sklearn.utils import resample
 
 # Function to perform resampling and feature selection
 @st.cache(allow_output_mutation=True)
@@ -35,11 +36,19 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     else:
         raise ValueError("Invalid feature selection method. Choose either 'Random Forest Importance' or 'SVM Weight Coefficients'.")
 
+    yes_indices = y[y == 'yes'].index
+    no_indices = y[y == 'no'].index
+
+    downsampled_yes_indices = resample(yes_indices, replace=False, n_samples=int(0.1 * len(yes_indices)), random_state=42)
+    new_indices = np.concatenate([downsampled_yes_indices, no_indices])
+    X_selected = X_selected.loc[new_indices]
+    y = y[new_indices]
     return X_selected, y, selected_features
+
 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     if model_name == "Logistic Regression":
-        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=1000)
+        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=5000)
     elif model_name == "Random Forest Classifier":
         model = RandomForestClassifier()
     elif model_name == "Support Vector Machine (SVM)":
@@ -132,10 +141,6 @@ def main():
 
             accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
             st.write("Average Accuracy:", accuracy)
-
-    if st.session_state.button_click:
-        # Add the code you want to execute after the button click here
-        pass
 
 if __name__ == "__main__":
     main()
