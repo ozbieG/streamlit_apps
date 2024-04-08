@@ -7,8 +7,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectFromModel
-from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import RandomUnderSampler
 from sklearn.utils import class_weight
 import streamlit as st
 import pandas as pd
@@ -59,7 +57,6 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-
     return accuracy
 
 # Streamlit App
@@ -77,6 +74,8 @@ def main():
     if 'selected_features' not in st.session_state:
         st.session_state.selected_features = []
     if 'button_click' not in st.session_state:
+        st.session_state.button_click = False
+    if 'button_click1' not in st.session_state:
         st.session_state.button_click = False
     if 'selected_feature_selection_method' not in st.session_state:
         st.session_state.selected_feature_selection_method = "Random Forest Importance"
@@ -123,24 +122,27 @@ def main():
 
         if st.button("Next"):
             st.session_state.button_click = True
-            X, y, selected_features = preprocess_data(st.session_state.df, st.session_state.selected_feature_selection_method, st.session_state.feature_selection_threshold)
-            st.session_state.selected_features = selected_features
 
-            # Allow manual editing of selected features using checkbox list
-            st.write("Selected Features:")
-            selected_features_editable = st.multiselect("Select features to include", selected_features, default=list(st.session_state.selected_features))
+    if st.session_state.button_click:
+        X, y, selected_features = preprocess_data(st.session_state.df, st.session_state.selected_feature_selection_method, st.session_state.feature_selection_threshold)
+        st.session_state.selected_features = selected_features
 
-            # Step 3: Model Training and Evaluation
-            st.subheader("Model Training and Evaluation")
+        # Allow manual editing of selected features using checkbox list
+        st.write("Selected Features:")
+        selected_features_editable = st.multiselect("Select features to include", selected_features, default=list(st.session_state.selected_features))
 
-            # Select the model
-            st.session_state.selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
+        # Step 3: Model Training and Evaluation
+        st.subheader("Model Training and Evaluation")
 
-            # Train-test split
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-            accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
-            st.write("Average Accuracy:", accuracy)
+        # Select the model
+        st.session_state.selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
+        if st.button("Train and Test"):
+            st.session_state.button_click1 = True
+        # Train-test split
+    if st.session_state.button_click1:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+        st.write("Average Accuracy:", accuracy)
 
 if __name__ == "__main__":
     main()
