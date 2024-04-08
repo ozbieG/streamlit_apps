@@ -69,13 +69,12 @@ def main():
 
     current_step = 0
 
-    # Upload CSV file
-    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
-    df = load_data()  # Call the cached function to load data
-
     if df is not None:
         # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
         if current_step == 0:
+            # Upload CSV file
+            uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+            df = load_data()  # Call the cached function to load data
             st.subheader("Exploratory Data Analysis (EDA)")
             st.write("Distribution of the target variable (machine_status):")
             st.write(df['machine_status'].value_counts())
