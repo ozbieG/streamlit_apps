@@ -64,6 +64,8 @@ def main():
         st.session_state.file_uploader_counter = 0
     if 'df' not in st.session_state:
         st.session_state.df = None
+    if 'selected_features' not in st.session_state:
+        st.session_state.selected_features = []
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
     @st.cache(allow_output_mutation=True)
@@ -103,10 +105,11 @@ def main():
 
         if st.button("Next"):
             X, y, selected_features = preprocess_data(st.session_state.df, selected_feature_selection_method, feature_selection_threshold)
+            st.session_state.selected_features = selected_features
 
             # Allow manual editing of selected features using checkbox list
             st.write("Selected Features:")
-            selected_features_editable = st.multiselect("Select features to include", selected_features, default=selected_features.tolist())
+            selected_features_editable = st.multiselect("Select features to include", selected_features, default=st.session_state.selected_features)
 
             # Step 3: Model Training and Evaluation
             st.subheader("Model Training and Evaluation")
