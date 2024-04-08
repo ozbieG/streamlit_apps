@@ -73,6 +73,10 @@ def main():
         st.session_state.df = None
     if 'selected_features' not in st.session_state:
         st.session_state.selected_features = []
+    if 'X' not in st.session_state:
+        st.session_state.X = []
+    if 'y' not in st.session_state:
+        st.session_state.y = []
     if 'button_click' not in st.session_state:
         st.session_state.button_click = False
     if 'button_click1' not in st.session_state:
@@ -126,7 +130,8 @@ def main():
     if st.session_state.button_click:
         X, y, selected_features = preprocess_data(st.session_state.df, st.session_state.selected_feature_selection_method, st.session_state.feature_selection_threshold)
         st.session_state.selected_features = selected_features
-
+        st.session_state.X = X
+        st.session_state.y = y
         # Allow manual editing of selected features using checkbox list
         st.write("Selected Features:")
         selected_features_editable = st.multiselect("Select features to include", selected_features, default=list(st.session_state.selected_features))
@@ -140,7 +145,7 @@ def main():
             st.session_state.button_click1 = True
         # Train-test split
     if st.session_state.button_click1:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.3, random_state=42)
         accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
         st.write("Average Accuracy:", accuracy)
 
