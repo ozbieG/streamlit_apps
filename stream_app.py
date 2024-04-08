@@ -77,8 +77,12 @@ def main():
     # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
     if current_step == 0:
         # Upload CSV file
-        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{file_uploader_counter}")  # Unique key
-        df = load_data(uploaded_file)  # Call the cached function to load data
+        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{file_uploader_counter}")
+        df = load_data(uploaded_file)
+
+        # Update current_step regardless of whether df is None (error handling will be later)
+        current_step = 1
+
         if df is not None:
             st.subheader("Exploratory Data Analysis (EDA)")
             st.write("Distribution of the target variable (machine_status):")
@@ -89,9 +93,6 @@ def main():
             plt.figure(figsize=(12, 8))
             sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
             st.pyplot()
-
-            # Automatically proceed to the next step after dataset upload
-            current_step = 1  # Update step after EDA
 
     # Step 2: Feature Selection
     elif current_step == 1:
@@ -116,7 +117,7 @@ def main():
     elif current_step == 2:
         st.subheader("Model Training and Evaluation")
 
-        if df is not None:  # Check if df is not None before training and evaluation
+        if df is not None:  # Check if df is None before training and evaluation
             # Select the model
             selected_model = st.selectbox("Select model", ["Logistic Regression", "Random Forest Classifier", "Support Vector Machine (SVM)"])
 
