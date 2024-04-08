@@ -77,8 +77,11 @@ def main():
                 return None  # Indicate error
 
     # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
-    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{st.session_state.file_uploader_counter}")
-    st.session_state.df = load_data(uploaded_file)
+    if st.session_state.df is None:
+        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{st.session_state.file_uploader_counter}")
+        if uploaded_file is not None:
+            st.session_state.df = load_data(uploaded_file)
+            st.session_state.file_uploader_counter += 1
     
     if st.session_state.df is not None:
         st.subheader("Exploratory Data Analysis (EDA)")
@@ -116,9 +119,6 @@ def main():
 
             accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, selected_model)
             st.write("Average Accuracy:", accuracy)
-
-    # Save current step and file uploader counter in session state
-    st.session_state.file_uploader_counter += 1
 
 if __name__ == "__main__":
     main()
