@@ -34,14 +34,15 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     else:
         raise ValueError("Invalid feature selection method. Choose either 'Random Forest Importance' or 'SVM Weight Coefficients'.")
 
-    yes_indices = y[y == 'yes'].index
-    no_indices = y[y == 'no'].index
+    yes_indices = y[y == 1].index
+    no_indices = y[y == 0].index
 
     downsampled_yes_indices = resample(yes_indices, replace=False, n_samples=int(0.1 * len(yes_indices)), random_state=42)
     new_indices = np.concatenate([downsampled_yes_indices, no_indices])
     X_selected = X_selected.loc[new_indices]
     y = y[new_indices]
     return X_selected, y, selected_features
+
 
 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
