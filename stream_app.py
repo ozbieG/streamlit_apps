@@ -58,7 +58,7 @@ def main():
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
     @st.cache(allow_output_mutation=True)
-    def load_data():
+    def load_data(uploaded_file):
         if uploaded_file is not None:
             try:
                 df = pd.read_csv(uploaded_file)
@@ -67,13 +67,14 @@ def main():
                 st.error(f"Error reading CSV file: {e}")
                 return None  # Indicate error
 
+
     current_step = 0
 
         # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
     if current_step == 0:
         # Upload CSV file
         uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
-        df = load_data()  # Call the cached function to load data
+        df = load_data(uploaded_file)  # Call the cached function to load data
         st.subheader("Exploratory Data Analysis (EDA)")
         st.write("Distribution of the target variable (machine_status):")
         st.write(df['machine_status'].value_counts())
@@ -85,7 +86,7 @@ def main():
         st.pyplot()
 
         if st.button("Next: Feature Selection"):
-            current_step = 1  # Update step after EDA
+                current_step = 1  # Update step after EDA
 
         # Step 2: Feature Selection
         if current_step == 1:
