@@ -57,11 +57,13 @@ def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
 
-    # Initialize current step as a session state
-    current_step = st.session_state.get('current_step', 0)
-
-    # Generate a counter for file uploader keys
-    file_uploader_counter = st.session_state.get('file_uploader_counter', 0)
+    # Initialize session state variables
+    if 'current_step' not in st.session_state:
+        st.session_state.current_step = 0
+    if 'file_uploader_counter' not in st.session_state:
+        st.session_state.file_uploader_counter = 0
+    if 'df' not in st.session_state:
+        st.session_state.df = None
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
     @st.cache(allow_output_mutation=True)
@@ -75,16 +77,16 @@ def main():
                 return None  # Indicate error
 
     # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
-    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{file_uploader_counter}")
-    df = load_data(uploaded_file)
+    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{st.session_state.file_uploader_counter}")
+    st.session_state.df = load_data(uploaded_file)
     
-    if df is not None:
+    if st.session_state.df is not None:
         st.subheader("Exploratory Data Analysis (EDA)")
         st.write("Distribution of the target variable (machine_status):")
-        st.write(df['machine_status'].value_counts())
+        st.write(st.session_state.df['machine_status'].value_counts())
         st.write("Correlation Heatmap:")
-        non_numeric_columns = df.select_dtypes(exclude=[np.number]).columns.tolist()
-        df_numeric = df.drop(columns=non_numeric_columns)
+        non_numeric_columns = st.session_state.df.select_dtypes(exclude=[np.number]).columns.tolist()
+        df_numeric = st.session_state.df.drop(columns=non_numeric_columns)
         plt.figure(figsize=(12, 8))
         sns.heatmap(df_numeric.corr(), annot=True, cmap='coolwarm', fmt=".2f")
         st.pyplot()
@@ -97,7 +99,7 @@ def main():
         feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
 
         if st.button("Next"):
-            X, y, selected_features = preprocess_data(df, selected_feature_selection_method, feature_selection_threshold)
+            X, y, selected_features = preprocess_data(st.session_state.df, selected_feature_selection_method, feature_selection_threshold)
 
             # Allow manual editing of selected features using checkbox list
             st.write("Selected Features:")
@@ -116,7 +118,7 @@ def main():
             st.write("Average Accuracy:", accuracy)
 
     # Save current step and file uploader counter in session state
-    st.session_state['file_uploader_counter'] = file_uploader_counter + 1
+    st.session_state.file_uploader_counter += 1
 
 if __name__ == "__main__":
     main()
