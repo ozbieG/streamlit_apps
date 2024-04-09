@@ -161,7 +161,9 @@ def main():
         st.write("Classification Report:")
         st.write(classification_report(y_test, y_pred))
 
-        # Visualize Confusion Matrix
+        # Confusion Matrix
+        st.write("Confusion Matrix:")
+        conf_matrix = confusion_matrix(y_test, y_pred)
         plt.figure(figsize=(8, 6))
         sns.heatmap(conf_matrix, annot=True, cmap='coolwarm', fmt='d')
         plt.title("Confusion Matrix")
