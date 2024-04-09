@@ -60,23 +60,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    st.write("Average Accuracy:", accuracy)
-
-    st.write("Classification Report:")
-    st.write(classification_report(y_test, y_pred))
-
-        # Confusion Matrix
-    st.write("Confusion Matrix:")
-    conf_matrix = confusion_matrix(y_test, y_pred)
-    st.write(conf_matrix)
-
-        # Visualize Confusion Matrix
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(conf_matrix, annot=True, cmap='coolwarm', fmt='d')
-    plt.title("Confusion Matrix")
-    plt.xlabel("Predicted Label")
-    plt.ylabel("True Label")
-    st.pyplot()
+    return y_pred,y_test,accuracy
 
 def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -168,7 +152,31 @@ def main():
         X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.3, random_state=42)
 
         # Train the model and evaluate
-        train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+        y_pred,y_test,accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+
+        # Display average accuracy
+        st.write("Average Accuracy:", accuracy)
+
+        # Classification Report
+        classification_rep = classification_report(y_test, y_pred)
+        classification_lines = classification_rep.split('\n')
+        st.write("Classification Report:")
+        for line in classification_lines:
+            st.write(line)
+
+        # Confusion Matrix
+        st.write("Confusion Matrix:")
+        conf_matrix = confusion_matrix(y_test, y_pred)
+        st.write(conf_matrix)
+
+        # Visualize Confusion Matrix
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(conf_matrix, annot=True, cmap='coolwarm', fmt='d')
+        plt.title("Confusion Matrix")
+        plt.xlabel("Predicted Label")
+        plt.ylabel("True Label")
+        st.pyplot()
+
 
 if __name__ == "__main__":
     main()
