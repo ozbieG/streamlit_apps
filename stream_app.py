@@ -9,7 +9,6 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectFromModel
 from sklearn.utils import class_weight
-from sklearn.model_selection import StratifiedKFold
 import streamlit as st
 import pandas as pd
 import time
@@ -35,7 +34,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
         coef_abs = np.abs(clf.coef_[0])
         selected_features = X.columns[coef_abs >= feature_selection_threshold]
         X_selected = X[selected_features]
-    elif feature_selection_method == "Recursive Feature Elimination":
+    elif feature_selection_method == "RFE":
         estimator = LogisticRegression()
         rfe = RFE(estimator, n_features_to_select=None)  # Selects half of the features
         rfe.fit(X, y)
@@ -49,8 +48,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     yes_indices = y[y == 1].index
     no_indices = y[y == 0].index
 
-    num_samples_to_keep = int(0.15 * len(yes_indices))
-    downsampled_yes_indices = np.random.choice(yes_indices, size=num_samples_to_keep, replace=False)
+    downsampled_yes_indices = resample(yes_indices, replace=False, n_samples=int(0.1 * len(yes_indices)), random_state=42)
     new_indices = np.concatenate([downsampled_yes_indices, no_indices])
     X_selected = X_selected.loc[new_indices]
     y = y[new_indices]
@@ -60,8 +58,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
 @st.cache(allow_output_mutation=True) 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     if model_name == "Logistic Regression":
-        cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
-        model = LogisticRegressionCV(Cs=10, cv=cv, penalty='l2', max_iter=5000)
+        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=5000)
     elif model_name == "Random Forest Classifier":
         model = RandomForestClassifier()
     elif model_name == "Support Vector Machine (SVM)":
@@ -135,7 +132,7 @@ def main():
         
         # Step 2: Feature Selection
         st.subheader("Feature Selection")
-        st.session_state.selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients","Recursive Feature Elimination"])
+        st.session_state.selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients","RFE"])
 
         # Select feature selection threshold
         st.session_state.feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
