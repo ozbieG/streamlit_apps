@@ -46,7 +46,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     return X_selected, y, selected_features
 
 
-
+@st.cache(allow_output_mutation=True) 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     if model_name == "Logistic Regression":
         model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=5000)
@@ -62,7 +62,6 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     accuracy = accuracy_score(y_test, y_pred)
     return accuracy
 
-@st.cache(allow_output_mutation=True) 
 def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
@@ -79,6 +78,7 @@ def main():
     st.session_state.setdefault('selected_model', "Logistic Regression")
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
+    @st.cache(allow_output_mutation=True) 
     def load_data(uploaded_file):
         if uploaded_file is not None:
             try:
