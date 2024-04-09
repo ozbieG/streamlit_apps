@@ -79,7 +79,6 @@ def main():
     st.session_state.setdefault('selected_model', "Logistic Regression")
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
-    @st.cache(allow_output_mutation=True) 
     def load_data(uploaded_file):
         if uploaded_file is not None:
             try:
