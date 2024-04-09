@@ -2,7 +2,8 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegressionCV,LogisticRegression
+from sklearn.feature_selection import RFE
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
@@ -32,6 +33,14 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
         clf.fit(X, y)
         coef_abs = np.abs(clf.coef_[0])
         selected_features = X.columns[coef_abs >= feature_selection_threshold]
+        X_selected = X[selected_features]
+    elif feature_selection_method == "RFE":
+        estimator = LogisticRegression()
+        rfe = RFE(estimator, n_features_to_select=None)  # Selects half of the features
+        rfe.fit(X, y)
+        support = rfe.support_
+        num_features = np.sum(support >= feature_selection_threshold)
+        selected_features = X.columns[support]
         X_selected = X[selected_features]
     else:
         raise ValueError("Invalid feature selection method. Choose either 'Random Forest Importance' or 'SVM Weight Coefficients'.")
@@ -123,7 +132,7 @@ def main():
         
         # Step 2: Feature Selection
         st.subheader("Feature Selection")
-        st.session_state.selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
+        st.session_state.selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients","Recursive Feature Elimination"])
 
         # Select feature selection threshold
         st.session_state.feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
@@ -149,7 +158,7 @@ def main():
             st.session_state.button_click1 = True
         # Train-test split
     if st.session_state.button_click1:
-        X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.99, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.9999, random_state=42)
 
         # Train the model and evaluate
         y_pred,y_test,accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
