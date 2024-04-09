@@ -34,7 +34,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
         coef_abs = np.abs(clf.coef_[0])
         selected_features = X.columns[coef_abs >= feature_selection_threshold]
         X_selected = X[selected_features]
-    elif feature_selection_method == "RFE":
+    elif feature_selection_method == "Recursive Feature Elimination":
         estimator = LogisticRegression()
         rfe = RFE(estimator, n_features_to_select=None)  # Selects half of the features
         rfe.fit(X, y)
