@@ -48,7 +48,8 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     yes_indices = y[y == 1].index
     no_indices = y[y == 0].index
 
-    downsampled_yes_indices = resample(yes_indices, replace=False, n_samples=int(0.1 * len(yes_indices)), random_state=42)
+    num_samples_to_keep = int(0.1 * len(yes_indices))
+    downsampled_yes_indices = np.random.choice(yes_indices, size=num_samples_to_keep, replace=False)
     new_indices = np.concatenate([downsampled_yes_indices, no_indices])
     X_selected = X_selected.loc[new_indices]
     y = y[new_indices]
