@@ -159,7 +159,7 @@ def main():
             st.session_state.button_click1 = True
         # Train-test split
     if st.session_state.button_click1:
-        X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.9999, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.9, random_state=42)
 
         # Train the model and evaluate
         y_pred,y_test,accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
