@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegressionCV,LogisticRegression
+from sklearn.model_selection import LeaveOneOut
 from sklearn.feature_selection import RFE
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -58,7 +59,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
 @st.cache(allow_output_mutation=True) 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     if model_name == "Logistic Regression":
-        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=5000)
+        model = LogisticRegressionCV(cv=LeaveOneOut(), penalty='l2', max_iter=5000)
     elif model_name == "Random Forest Classifier":
         model = RandomForestClassifier()
     elif model_name == "Support Vector Machine (SVM)":
