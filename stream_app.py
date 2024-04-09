@@ -158,11 +158,8 @@ def main():
         st.write("Average Accuracy:", accuracy)
 
         # Classification Report
-        classification_rep = classification_report(y_test, y_pred)
-        classification_lines = classification_rep.split('\n')
         st.write("Classification Report:")
-        for line in classification_lines:
-            st.write(line)
+        st.write(classification_report(y_test, y_pred))
 
         # Confusion Matrix
         st.write("Confusion Matrix:")
