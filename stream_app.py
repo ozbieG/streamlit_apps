@@ -62,37 +62,23 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     accuracy = accuracy_score(y_test, y_pred)
     return accuracy
 
-# Streamlit App
 def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
-
-    # Initialize session state variables
-    if 'current_step' not in st.session_state:
-        st.session_state.current_step = 0
-    if 'file_uploader_counter' not in st.session_state:
-        st.session_state.file_uploader_counter = 0
-    if 'df' not in st.session_state:
-        st.session_state.df = None
-    if 'selected_features' not in st.session_state:
-        st.session_state.selected_features = []
-    if 'X' not in st.session_state:
-        st.session_state.X = []
-    if 'y' not in st.session_state:
-        st.session_state.y = []
-    if 'button_click' not in st.session_state:
-        st.session_state.button_click = False
-    if 'button_click1' not in st.session_state:
-        st.session_state.button_click1 = False
-    if 'selected_feature_selection_method' not in st.session_state:
-        st.session_state.selected_feature_selection_method = "Random Forest Importance"
-    if 'feature_selection_threshold' not in st.session_state:
-        st.session_state.feature_selection_threshold = 0.05
-    if 'selected_model' not in st.session_state:
-        st.session_state.selected_model = "Logistic Regression"
+    st.session_state.setdefault('current_step', 0)
+    st.session_state.setdefault('file_uploader_counter', 0)
+    st.session_state.setdefault('df', None)
+    st.session_state.setdefault('selected_features', [])
+    st.session_state.setdefault('X', [])
+    st.session_state.setdefault('y', [])
+    st.session_state.setdefault('button_click', False)
+    st.session_state.setdefault('button_click1', False)
+    st.session_state.setdefault('selected_feature_selection_method', "Random Forest Importance")
+    st.session_state.setdefault('feature_selection_threshold', 0.05)
+    st.session_state.setdefault('selected_model', "Logistic Regression")
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
-    @st.cache(allow_output_mutation=True)
+    @st.cache(allow_output_mutation=True) 
     def load_data(uploaded_file):
         if uploaded_file is not None:
             try:
@@ -103,11 +89,11 @@ def main():
                 return None  # Indicate error
 
     # Step 1: Exploratory Data Analysis (EDA) & Correlation Heatmap
-    if st.session_state.df is None:
-        uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{st.session_state.file_uploader_counter}")
-        if uploaded_file is not None:
-            st.session_state.df = load_data(uploaded_file)
-            st.session_state.file_uploader_counter += 1
+
+    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key=f"file_uploader_{st.session_state.file_uploader_counter}")
+    if uploaded_file is not None:
+        st.session_state.df = load_data(uploaded_file)
+        st.session_state.file_uploader_counter += 1
     
     if st.session_state.df is not None:
         st.subheader("Exploratory Data Analysis (EDA)")
