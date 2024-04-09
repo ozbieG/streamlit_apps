@@ -112,8 +112,8 @@ def main():
         # Numeric features summary statistics
         st.write("Summary statistics for numeric features:")
         st.write(st.session_state.df.describe())
-        
-        numeric_columns = df.select_dtypes(include=['number']).columns
+
+        numeric_columns = st.session_state.df.select_dtypes(include=['number']).columns
         # Correlation heatmap for numeric features
         st.write("Correlation Heatmap for numeric features:")
         plt.figure(figsize=(12, 8))
