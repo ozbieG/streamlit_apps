@@ -9,6 +9,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectFromModel
 from sklearn.utils import class_weight
+from sklearn.model_selection import StratifiedKFold
 import streamlit as st
 import pandas as pd
 import time
@@ -59,7 +60,8 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
 @st.cache(allow_output_mutation=True) 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     if model_name == "Logistic Regression":
-        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=5000)
+        cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+        model = LogisticRegressionCV(Cs=10, cv=cv, penalty='l2', max_iter=5000)
     elif model_name == "Random Forest Classifier":
         model = RandomForestClassifier()
     elif model_name == "Support Vector Machine (SVM)":
