@@ -19,25 +19,9 @@ from sklearn.metrics import classification_report, confusion_matrix
 # Function to perform resampling and feature selection
 @st.cache(allow_output_mutation=True)
 def preprocess_data(df, feature_selection_method, feature_selection_threshold):
-    # Initialize LabelEncoder
-    encoder = LabelEncoder()
-
-    # Encode the 'Repair History' column
-    df['Repair History'] = encoder.fit_transform(df['Repair History'])
-
-    # Drop the 'timestamp' column
     df = df.drop(columns=['timestamp'])
-
-    # Fill missing values with the mean for numerical variables
-    for col in df.columns:
-        if df[col].dtype != 'object':  # Check if the column is numeric
-            df[col].fillna(df[col].mean(), inplace=True)
-
-    # Separate features (X) and target variable (y)
     X = df.drop(columns=['machine_status'])
     y = df['machine_status']
-
-
     if feature_selection_method == "Random Forest Importance":
         clf = RandomForestClassifier()
         clf.fit(X, y)
