@@ -20,9 +20,6 @@ from sklearn.metrics import classification_report, confusion_matrix
 @st.cache(allow_output_mutation=True)
 def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     df = df.drop(columns=['timestamp'])
-    for col in df.columns:
-        if df[col].dtype != 'object':  # Check if the column is numeric
-            df[col].fillna(df[col].mean(), inplace=True)
     X = df.drop(columns=['machine_status'])
     y = df['machine_status']
 
