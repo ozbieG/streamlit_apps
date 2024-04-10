@@ -21,7 +21,9 @@ from sklearn.metrics import classification_report, confusion_matrix
 def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     encoder = LabelEncoder()
     df['Repair History'] = encoder.fit_transform(df['Repair History'])
-    X = df.drop(columns=['machine_status', 'timestamp'])
+    df = df.drop(columns=['timestamp'])
+    df.fillna(df.mean(), inplace=True) 
+    X = df.drop(columns=['machine_status'])
     y = df['machine_status']
 
     if feature_selection_method == "Random Forest Importance":
