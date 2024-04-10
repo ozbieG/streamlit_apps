@@ -2,7 +2,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegressionCV,LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
@@ -29,6 +29,12 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
         X_selected = X[selected_features]
     elif feature_selection_method == "SVM Weight Coefficients":
         clf = SVC(kernel="linear")
+        clf.fit(X, y)
+        coef_abs = np.abs(clf.coef_[0])
+        selected_features = X.columns[coef_abs >= feature_selection_threshold]
+        X_selected = X[selected_features]
+    if feature_selection_method == "Logistic Regression Coefficients":
+        clf = LogisticRegression()
         clf.fit(X, y)
         coef_abs = np.abs(clf.coef_[0])
         selected_features = X.columns[coef_abs >= feature_selection_threshold]
@@ -120,10 +126,10 @@ def main():
         sns.heatmap(st.session_state.df[numeric_columns].corr(), annot=True, cmap='coolwarm', fmt=".2f")
         st.pyplot()
 
-        
+    
         # Step 2: Feature Selection
         st.subheader("Feature Selection")
-        st.session_state.selected_feature_selection_method = st.selectbox("Select feature selection method", ["Random Forest Importance", "SVM Weight Coefficients"])
+        st.session_state.selected_feature_selection_method = st.selectbox("Select feature selection method", ["Logistic Regression Coefficients","Random Forest Importance", "SVM Weight Coefficients"])
 
         # Select feature selection threshold
         st.session_state.feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
