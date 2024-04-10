@@ -70,6 +70,14 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     accuracy = accuracy_score(y_test, y_pred)
     return y_pred,y_test,accuracy
 
+@st.cache(allow_output_mutation=True) 
+def get_confusion_matrix(y_test,y_pred):
+    return confusion_matrix(y_test, y_pred)
+
+@st.cache(allow_output_mutation=True) 
+def get_corr(df):
+    return df.corr()
+
 def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Predictive Maintenance Model")
@@ -122,10 +130,11 @@ def main():
         st.write(st.session_state.df.describe())
 
         numeric_columns = st.session_state.df.select_dtypes(include=['number']).columns
+        corr = get_corr(st.session_state.df[numeric_columns])
         # Correlation heatmap for numeric features
         st.write("Correlation Heatmap for numeric features:")
         plt.figure(figsize=(12, 8))
-        sns.heatmap(st.session_state.df[numeric_columns].corr(), annot=True, cmap='coolwarm', fmt=".2f")
+        sns.heatmap(corr, annot=True, cmap='coolwarm', fmt=".2f")
         st.pyplot()
 
     
@@ -171,7 +180,7 @@ def main():
 
         # Confusion Matrix
         st.write("Confusion Matrix:")
-        conf_matrix = confusion_matrix(y_test, y_pred)
+        conf_matrix = get_confusion_matrix(y_test, y_pred)
         plt.figure(figsize=(8, 6))
         sns.heatmap(conf_matrix, annot=True, cmap='coolwarm', fmt='d')
         plt.title("Confusion Matrix")
