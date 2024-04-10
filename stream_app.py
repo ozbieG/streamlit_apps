@@ -19,9 +19,9 @@ from sklearn.metrics import classification_report, confusion_matrix
 # Function to perform resampling and feature selection
 @st.cache(allow_output_mutation=True)
 def preprocess_data(df, feature_selection_method, feature_selection_threshold):
-    X = df.drop(columns=['machine_status', 'timestamp'])
     encoder = LabelEncoder()
     df['Repair History'] = encoder.fit_transform(df['Repair History'])
+    X = df.drop(columns=['machine_status', 'timestamp'])
     y = df['machine_status']
 
     if feature_selection_method == "Random Forest Importance":
