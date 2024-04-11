@@ -14,6 +14,7 @@ import pandas as pd
 import time
 from sklearn.utils import resample
 from sklearn.metrics import classification_report, confusion_matrix
+import shap
 
 
 # Function to perform resampling and feature selection
@@ -69,7 +70,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    return y_pred,y_test,accuracy
+    return y_pred,y_test,accuracy,model
 
 @st.cache(allow_output_mutation=True) 
 def get_confusion_matrix(y_test,y_pred):
@@ -170,7 +171,15 @@ def main():
         X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.3, random_state=42)
 
         # Train the model and evaluate
-        y_pred,y_test,accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+        y_pred,y_test,accuracy,model = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+        explainer = shap.Explainer(model)
+        shap_values = explainer.shap_values(X_train)
+        shap.summary_plot(shap_values, X_train)
+
+        sample_index = 0
+        shap.initjs()
+        shap.force_plot(explainer.expected_value, shap_values[sample_index], X_train.iloc[sample_index])
+        plt.show()
 
         # Display average accuracy
         st.write("Accuracy:", accuracy)
