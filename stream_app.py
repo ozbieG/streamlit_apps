@@ -144,7 +144,7 @@ def main():
         st.session_state.selected_feature_selection_method = st.selectbox("Select feature selection method", ["Logistic Regression Coefficients","Random Forest Importance", "SVM Weight Coefficients"])
 
         # Select feature selection threshold
-        st.session_state.feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.05, step=0.05)
+        st.session_state.feature_selection_threshold = st.slider("Select feature selection threshold", min_value=0.0, max_value=1.0, value=0.01, step=0.01)
 
         if st.button("Next"):
             st.session_state.button_click = True
