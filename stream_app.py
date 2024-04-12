@@ -51,6 +51,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
     new_indices = np.concatenate([downsampled_yes_indices, no_indices])
     X_selected = X_selected.loc[new_indices]
     y = y[new_indices]
+    st.session_state.X_whole = X[selected_features]
 
     return X_selected, y, selected_features
 
@@ -68,8 +69,8 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
 
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    probabilities = model.predict_proba(st.session_state.df.drop(columns=['machine_status','timestamp']))
-    total_pred = model.predict(st.session_state.df.drop(columns=['machine_status','timestamp']))
+    probabilities = model.predict_proba(st.session_state.X_whole)
+    total_pred = model.predict(st.session_state.X_whole)
     accuracy = accuracy_score(y_test, y_pred)
     return y_pred,y_test,accuracy,probabilities,total_pred
 
@@ -109,6 +110,7 @@ def main():
     st.session_state.setdefault('selected_feature_selection_method', "Random Forest Importance")
     st.session_state.setdefault('feature_selection_threshold', 0.05)
     st.session_state.setdefault('selected_model', "Logistic Regression")
+    st.session_state.setdefault('X_whole', [])
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
     @st.cache(allow_output_mutation=True)
