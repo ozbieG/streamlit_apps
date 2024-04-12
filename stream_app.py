@@ -62,14 +62,16 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
     elif model_name == "Random Forest Classifier":
         model = RandomForestClassifier()
     elif model_name == "Support Vector Machine (SVM)":
-        model = SVC()
+        model = SVC(probablity=True)
     else:
         raise ValueError("Invalid model name. Choose either 'Logistic Regression', 'Random Forest Classifier', or 'Support Vector Machine (SVM)'.")
 
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
+    probabilities = model.predict_proba(st.session_state.X)[:, 1]
+    total_pred = model.predict(st.session_state.X)
     accuracy = accuracy_score(y_test, y_pred)
-    return y_pred,y_test,accuracy
+    return y_pred,y_test,accuracy,probabilities,total_pred
 
 @st.cache(allow_output_mutation=True) 
 def get_confusion_matrix(y_test,y_pred):
@@ -78,6 +80,20 @@ def get_confusion_matrix(y_test,y_pred):
 @st.cache(allow_output_mutation=True) 
 def get_corr(df):
     return df.corr()
+
+@st.cache(allow_output_mutation=True) 
+def generate_recommended_days(df,probabilities,labels):
+    recommended_days = []
+    for prob, label in zip(probabilities, labels):
+        if label == 0:
+            recommended_days.append(0)  # Set recommended days to 0 if label is 0
+        elif prob < 0.3:
+            recommended_days.append(7)  # Schedule maintenance in 7 days if probability is low
+        elif prob < 0.6:
+            recommended_days.append(3)  # Schedule maintenance in 3 days if probability is moderate
+        else:
+            recommended_days.append(1)  # Schedule maintenance in 1 day if probability is high
+    return recommended_days
 
 def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -95,7 +111,7 @@ def main():
     st.session_state.setdefault('selected_model', "Logistic Regression")
 
     # Cache the loaded DataFrame to avoid re-reading the CSV on every button click
-    @st.cache(allow_output_mutation=True) 
+    @st.cache(allow_output_mutation=True)
     def load_data(uploaded_file):
         if uploaded_file is not None:
             try:
@@ -170,7 +186,7 @@ def main():
         X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.3, random_state=42)
 
         # Train the model and evaluate
-        y_pred,y_test,accuracy = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+        y_pred,y_test,accuracy,probabilities,total_pred = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
 
         # Display average accuracy
         st.write("Accuracy:", accuracy)
@@ -188,7 +204,16 @@ def main():
         plt.xlabel("Predicted Label")
         plt.ylabel("True Label")
         st.pyplot()
-
+        recommended_days = generate_recommended_days(st.session_state.X,probabilities,total_pred)
+        st.session_state.df['Days_to_service'] = recommended_days
+        if st.button("Download CSV"):
+            csv_file = st.session_state.df.to_csv(index=False)
+            st.download_button(
+                label="Download CSV",
+                data=csv_file,
+                file_name="maintenance_recommendations.csv",
+                mime="text/csv"
+            )
 
 if __name__ == "__main__":
     main()
