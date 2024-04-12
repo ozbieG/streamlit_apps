@@ -68,8 +68,8 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
 
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    probabilities = model.predict_proba(st.session_state.X)[:, 1]
-    total_pred = model.predict(st.session_state.X)
+    probabilities = model.predict_proba(st.session_state.df.drop(columns=['machine_status']))[:, 1]
+    total_pred = model.predict(st.session_state.df.drop(columns=['machine_status']))
     accuracy = accuracy_score(y_test, y_pred)
     return y_pred,y_test,accuracy,probabilities,total_pred
 
