@@ -198,7 +198,7 @@ def main():
         plt.xlabel("Predicted Label")
         plt.ylabel("True Label")
         st.pyplot()
-        recommended_days = generate_recommended_days(st.session_state.X,probabilities,total_pred)
+        recommended_days = generate_recommended_days(probabilities)
         st.session_state.df['Days_to_service'] = recommended_days
         if st.button("Download CSV"):
             csv_file = st.session_state.df.to_csv(index=False)
