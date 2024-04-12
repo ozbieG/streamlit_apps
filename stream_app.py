@@ -83,17 +83,9 @@ def get_corr(df):
     return df.corr()
 
 @st.cache(allow_output_mutation=True) 
-def generate_recommended_days(df,probabilities,labels):
-    recommended_days = []
-    for prob, label in zip(probabilities, labels):
-        if label == 0:
-            recommended_days.append(0)  # Set recommended days to 0 if label is 0
-        elif prob < 0.3:
-            recommended_days.append(7)  # Schedule maintenance in 7 days if probability is low
-        elif prob < 0.6:
-            recommended_days.append(3)  # Schedule maintenance in 3 days if probability is moderate
-        else:
-            recommended_days.append(1)  # Schedule maintenance in 1 day if probability is high
+def generate_recommended_days(probabilities):
+    scaled_probabilities = probabilities * 100
+    recommended_days = np.round(np.interp(scaled_probabilities, [0, 30, 50, 70, 100], [0, 1, 10, 20, 30])).astype(int)
     return recommended_days
 
 def main():
