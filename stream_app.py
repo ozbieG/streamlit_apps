@@ -100,7 +100,7 @@ def main():
     st.session_state.setdefault('button_click', False)
     st.session_state.setdefault('button_click1', False)
     st.session_state.setdefault('selected_feature_selection_method', "Random Forest Importance")
-    st.session_state.setdefault('feature_selection_threshold', 0.05)
+    st.session_state.setdefault('feature_selection_threshold', 0.01)
     st.session_state.setdefault('selected_model', "Logistic Regression")
     st.session_state.setdefault('X_whole', [])
 
@@ -199,7 +199,6 @@ def main():
         plt.ylabel("True Label")
         st.pyplot()
         recommended_days = generate_recommended_days(probabilities)
-        recommended_days = recommended_days.reshape(-1)
         st.session_state.df['Days_to_service'] = recommended_days
         if st.button("Download CSV"):
             csv_file = st.session_state.df.to_csv(index=False)
