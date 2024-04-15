@@ -49,15 +49,15 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
 
     downsampled_yes_indices = resample(yes_indices, replace=False, n_samples=len(no_indices), random_state=42)
     new_indices = np.concatenate([downsampled_yes_indices, no_indices])
+    X_whole = X_selected.copy()
     X_selected = X_selected.loc[new_indices]
     y = y[new_indices]
-    st.session_state.X_whole = X[selected_features]
 
-    return X_selected, y, selected_features
+    return X_selected, y, selected_features,X_whole
 
 
 @st.cache(allow_output_mutation=True) 
-def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
+def train_and_evaluate(X_train, y_train, X_test, y_test, model_name,X_whole):
     if model_name == "Logistic Regression":
         model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=5000)
     elif model_name == "Random Forest Classifier":
@@ -69,8 +69,8 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name):
 
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    probabilities = model.predict_proba(st.session_state.X_whole)
-    total_pred = model.predict(st.session_state.X_whole)
+    probabilities = model.predict_proba(X_whole)
+    total_pred = model.predict(X_whole)
     accuracy = accuracy_score(y_test, y_pred)
     return y_pred,y_test,accuracy,probabilities,total_pred
 
@@ -160,10 +160,11 @@ def main():
             st.session_state.button_click = True
 
     if st.session_state.button_click:
-        X, y, selected_features = preprocess_data(st.session_state.df, st.session_state.selected_feature_selection_method, st.session_state.feature_selection_threshold)
+        X, y, selected_features, X_whole = preprocess_data(st.session_state.df, st.session_state.selected_feature_selection_method, st.session_state.feature_selection_threshold)
         st.session_state.selected_features = selected_features
         st.session_state.X = X
         st.session_state.y = y
+        st.session_state.X_whole = X_whole
         # Allow manual editing of selected features using checkbox list
         st.write("Selected Features:")
         selected_features_editable = st.multiselect("Select features to include", selected_features, default=list(st.session_state.selected_features))
@@ -180,7 +181,7 @@ def main():
         X_train, X_test, y_train, y_test = train_test_split(st.session_state.X, st.session_state.y, test_size=0.3, random_state=42)
 
         # Train the model and evaluate
-        y_pred,y_test,accuracy,probabilities,total_pred = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model)
+        y_pred,y_test,accuracy,probabilities,total_pred = train_and_evaluate(X_train, y_train, X_test, y_test, st.session_state.selected_model,st.session_state.X_whole)
 
         # Display average accuracy
         st.write("Accuracy:", accuracy)
