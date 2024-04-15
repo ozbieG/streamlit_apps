@@ -60,7 +60,12 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name,X_whole):
     if model_name == "Logistic Regression":
         model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=15000)
     elif model_name == "Random Forest Classifier":
-        model = RandomForestClassifier()
+        model = RandomForestClassifier(n_estimators=10, 
+                               max_depth=5, 
+                               min_samples_split=10, 
+                               min_samples_leaf=5, 
+                               max_features='sqrt', 
+                               bootstrap=False)
     elif model_name == "Support Vector Machine (SVM)":
         model = SVC(probability=True)
     else:
