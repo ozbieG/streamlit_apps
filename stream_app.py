@@ -83,12 +83,13 @@ def get_corr(df):
     return df.corr()
 
 @st.cache(allow_output_mutation=True) 
-def generate_recommended_days(probabilities,predicted_labels):
+def generate_recommended_days(probabilities, actual_labels):
     scaled_probabilities = probabilities * 100
     negative_class_probabilities = scaled_probabilities[:, 1]
     recommended_days = np.round(np.interp(negative_class_probabilities, [0, 30, 50, 70, 100], [0, 1, 10, 20, 30])).astype(int)
-    recommended_days[predicted_labels == 0] = 0
+    recommended_days[actual_labels == 0] = 0
     return recommended_days
+
 
 def main():
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -201,7 +202,7 @@ def main():
         plt.xlabel("Predicted Label")
         plt.ylabel("True Label")
         st.pyplot()
-        recommended_days = generate_recommended_days(probabilities,total_pred)
+        recommended_days = generate_recommended_days(probabilities,st.session_state.df.drop(columns=['machine_status']))
         st.session_state.df['Days_to_service'] = recommended_days
         if st.button("Download CSV"):
             csv_file = st.session_state.df.to_csv(index=False)
