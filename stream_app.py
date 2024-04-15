@@ -59,7 +59,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
 @st.cache(allow_output_mutation=True) 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name,X_whole):
     if model_name == "Logistic Regression":
-        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=5000)
+        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=10000)
     elif model_name == "Random Forest Classifier":
         model = RandomForestClassifier()
     elif model_name == "Support Vector Machine (SVM)":
