@@ -85,7 +85,8 @@ def get_corr(df):
 @st.cache(allow_output_mutation=True) 
 def generate_recommended_days(probabilities):
     scaled_probabilities = probabilities * 100
-    recommended_days = np.round(np.interp(scaled_probabilities, [0, 30, 50, 70, 100], [0, 1, 10, 20, 30])).astype(int)
+    negative_class_probabilities = scaled_probabilities[:, 0]
+    recommended_days = np.round(np.interp(negative_class_probabilities, [0, 30, 50, 70, 100], [0, 1, 10, 20, 30])).astype(int)
     return recommended_days
 
 def main():
