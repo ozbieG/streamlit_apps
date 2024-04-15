@@ -63,7 +63,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model_name,X_whole):
     elif model_name == "Random Forest Classifier":
         model = RandomForestClassifier()
     elif model_name == "Support Vector Machine (SVM)":
-        model = SVC(probablity=True)
+        model = SVC(probability=True)
     else:
         raise ValueError("Invalid model name. Choose either 'Logistic Regression', 'Random Forest Classifier', or 'Support Vector Machine (SVM)'.")
 
