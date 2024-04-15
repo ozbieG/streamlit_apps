@@ -86,7 +86,7 @@ def get_corr(df):
 def generate_recommended_days(probabilities, df):
     scaled_probabilities = probabilities * 100
     negative_class_probabilities = scaled_probabilities[:, 1]
-    recommended_days = np.round(np.interp(negative_class_probabilities, [95, 96, 97, 98, 99, 100], [0, 5, 10, 15, 20, 25, 30])).astype(int)
+    recommended_days = np.round(np.interp(negative_class_probabilities, [0,95, 96, 97, 98, 99, 100], [0, 5, 10, 15, 20, 25, 30])).astype(int)
     recommended_days[df['machine_status'] == 0] = 0
     return recommended_days
 
