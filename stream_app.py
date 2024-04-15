@@ -59,7 +59,7 @@ def preprocess_data(df, feature_selection_method, feature_selection_threshold):
 @st.cache(allow_output_mutation=True) 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model_name,X_whole):
     if model_name == "Logistic Regression":
-        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=10000)
+        model = LogisticRegressionCV(Cs=10, cv=5, penalty='l2', max_iter=15000)
     elif model_name == "Random Forest Classifier":
         model = RandomForestClassifier()
     elif model_name == "Support Vector Machine (SVM)":
@@ -83,11 +83,11 @@ def get_corr(df):
     return df.corr()
 
 @st.cache(allow_output_mutation=True) 
-def generate_recommended_days(probabilities, actual_labels):
+def generate_recommended_days(probabilities, df):
     scaled_probabilities = probabilities * 100
     negative_class_probabilities = scaled_probabilities[:, 1]
     recommended_days = np.round(np.interp(negative_class_probabilities, [0, 30, 50, 70, 100], [0, 1, 10, 20, 30])).astype(int)
-    recommended_days[actual_labels == 0] = 0
+    recommended_days[df['machine_status'] == 0] = 0
     return recommended_days
 
 
